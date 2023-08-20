@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Document</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" />
+		<script
+			src="https://code.jquery.com/jquery-3.7.0.slim.js"
+			integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c="
+			crossorigin="anonymous"></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"
+			integrity="sha512-2rNj2KJ+D8s1ceNasTIex6z4HWyOnEYLVC3FigGOmyQCZc2eBXKgOxQmo3oKLHyfcj53uz4QMsRCWNbLd32Q1g=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+			integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+			crossorigin="anonymous"></script>
+	</head>
+	<body class="bg-primary">
+		<div class="container mt-5">
+			<center><h1 class="text-white">Live Chat</h1></center>
+			<div class="card-mt-3">
+				<div class="card-body">
+					<h5><span id="totalUserOnline"></span> orang online</h5>
+					<div id="message-list" style="height: 40vh; overflow-y: auto"></div>
+					<div id="form-message" class="mt-1">
+						<div class="row">
+							<div class="col-8">
+								<input class="form-control" id="message" />
+							</div>
+							<div class="col-4">
+								<button class="btn btn-primary" id="sendMessage">Kirim Pesan</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io();
+        
+            socket.emit("join");
+            socket.on("message", (param) => {
+                $("#message-list").append(`
+                    <div class="card-mt-1">
+                        <div class="card-body">
+                            ${param.text}
+                        </div>
+                    </div>
+                `);
+            });
+            
+            socket.on("countUserOnline", (countUserOnline) => {
+                $("#totalUserOnline").text(countUserOnline);
+            });
+            
+            socket.on("previousMessages", (previousMessages) => { // Menerima pesan sebelumnya
+                previousMessages.forEach((message) => {
+                    $("#message-list").append(`
+                        <div class="card-mt-1">
+                            <div class="card-body">
+                                ${message.text}
+                            </div>
+                        </div>
+                    `);
+                });
+            });
+            
+            $("#sendMessage").click(() => {
+                socket.emit("message", {
+                    text: $("#message").val(),
+                });
+            });
+        </script>
+        
+	</body>
+</html>
